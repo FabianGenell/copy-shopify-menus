@@ -147,7 +147,8 @@ function App() {
       {/* Only show MenuFinder if we're not already on a specific menu page */}
       {(!pageContext?.isSpecificMenuPage || !selectedMenu) && (
         <div className="mb-3">
-          {pageContext?.isMenusPage && !pageContext?.isSpecificMenuPage && (
+          {/* Only show notice if no menu is selected */}
+          {pageContext?.isMenusPage && !pageContext?.isSpecificMenuPage && !selectedMenu && (
             <div className="bg-blue-50 p-2 mb-2 rounded text-xs text-blue-700">
               You're on the menus page. Select a specific menu.
             </div>

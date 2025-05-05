@@ -126,26 +126,29 @@ export function MenuFinder({ onMenuFound }: MenuFinderProps) {
             </div>
           )}
           
-          <div className="mb-1">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Or enter menu ID directly"
-                className="flex-1 rounded border-gray-200 p-2 text-sm bg-gray-50"
-                value={menuId}
-                onChange={(e) => setMenuId(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isLoading}
-              />
-              <button 
-                className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
-                onClick={findMenu}
-                disabled={!menuId.trim() || isLoading}
-              >
-                {isLoading ? '...' : 'Find'}
-              </button>
+          {/* Only show direct ID input if no menu is selected */}
+          {!menuId && (
+            <div className="mb-1">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Or enter menu ID directly"
+                  className="flex-1 rounded border-gray-200 p-2 text-sm bg-gray-50"
+                  value={menuId}
+                  onChange={(e) => setMenuId(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={isLoading}
+                />
+                <button 
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
+                  onClick={findMenu}
+                  disabled={!menuId.trim() || isLoading}
+                >
+                  {isLoading ? '...' : 'Find'}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </>
       )}
       
