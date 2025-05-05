@@ -120,6 +120,8 @@ function App() {
         return <MenuExport menu={selectedMenu} />;
       case Tab.IMPORT:
         return <MenuImport onSuccess={handleImportSuccess} />;
+      default:
+        return null;
     }
   };
   
@@ -132,64 +134,71 @@ function App() {
   }
   
   return (
-    <div className="flex flex-col w-96 p-3 bg-white">
-      <header className="mb-3 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-gray-800">Shopify Menu Tool</h1>
-        <img src="./icon.png" alt="Shopify Menu Tool" className="h-6 w-6" />
+    <div className="flex flex-col w-96 p-4 bg-white shadow-sm">
+      <header className="mb-4 flex justify-between items-center">
+        <h1 className="text-xl font-semibold text-gray-800">Shopify Menu Tool</h1>
+        <img src="./icon.png" alt="Shopify Menu Tool" className="h-7 w-7" />
       </header>
       
       {error && (
-        <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-xs">
+        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md border border-red-100 text-sm">
           {error}
         </div>
       )}
       
-      {/* Only show MenuFinder if we're not already on a specific menu page */}
-      {(!pageContext?.isSpecificMenuPage || !selectedMenu) && (
-        <div className="mb-3">
-          {/* Only show notice if no menu is selected */}
-          {pageContext?.isMenusPage && !pageContext?.isSpecificMenuPage && !selectedMenu && (
-            <div className="bg-blue-50 p-2 mb-2 rounded text-xs text-blue-700">
-              You're on the menus page. Select a specific menu.
-            </div>
-          )}
-          <MenuFinder onMenuFound={handleMenuFound} />
-        </div>
-      )}
+      {/* Always show menu finder */}
+      <div className={`${selectedMenu ? 'pb-4 mb-4' : 'pb-5 mb-5'} border-b border-gray-200`}>
+        <h2 className="text-base font-medium mb-2 text-gray-800">Menu Selection</h2>
+        
+        {pageContext?.isMenusPage && !pageContext?.isSpecificMenuPage && !selectedMenu && (
+          <div className="bg-blue-50 p-3 mb-3 rounded-md border border-blue-100 text-sm text-blue-700">
+            You're on the menus page. Select a specific menu from below.
+          </div>
+        )}
+        
+        {!selectedMenu && (
+          <p className="text-sm text-gray-600 mb-3">
+            Find and select a menu from your store:
+          </p>
+        )}
+        
+        <MenuFinder onMenuFound={handleMenuFound} />
+      </div>
       
-      {selectedMenu && (
+      {selectedMenu ? (
         <>
-          <div className="mb-3">
+          <div className="mb-4 p-3 bg-green-50 rounded-md border border-green-100">
             <MenuInfo menu={selectedMenu} />
           </div>
           
-          <div className="mb-3">
-            <nav className="flex border-b border-gray-200">
+          {/* Show tabs after a menu is selected */}
+          <div className="mb-4">
+            <nav className="flex border border-gray-200 rounded-md overflow-hidden">
               <button
-                className={`flex-1 px-4 py-2 text-xs font-medium ${
+                className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors duration-150 ${
                   activeTab === Tab.COPY
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
                 onClick={() => setActiveTab(Tab.COPY)}
               >
                 Copy
               </button>
               <button
-                className={`flex-1 px-4 py-2 text-xs font-medium ${
+                className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors duration-150 ${
                   activeTab === Tab.EXPORT
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
                 onClick={() => setActiveTab(Tab.EXPORT)}
               >
                 Export
               </button>
               <button
-                className={`flex-1 px-4 py-2 text-xs font-medium ${
+                className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors duration-150 ${
                   activeTab === Tab.IMPORT
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
                 onClick={() => setActiveTab(Tab.IMPORT)}
               >
@@ -198,17 +207,17 @@ function App() {
             </nav>
           </div>
           
-          <div>
+          <div className="bg-white rounded-md border border-gray-200 p-4">
             {renderTabContent()}
           </div>
         </>
-      )}
-      
-      {!selectedMenu && !pageContext?.isSpecificMenuPage && (
-        <div className="text-center text-gray-600 bg-gray-50 p-4 rounded text-xs">
-          {pageContext?.isMenusPage 
-            ? "Select a menu from the Shopify admin" 
-            : "Search for a menu to get started"}
+      ) : (
+        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+          <h2 className="text-base font-medium mb-2 text-gray-800">Import a Menu</h2>
+          <p className="text-sm text-gray-600 mb-3">
+            Import a menu from a JSON file:
+          </p>
+          <MenuImport onSuccess={handleImportSuccess} />
         </div>
       )}
     </div>

@@ -76,6 +76,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 return false;
             }
 
+            // Check if we're on Shopify admin
+            if (!window.location.href.includes('admin.shopify.com')) {
+                console.debug('Not on Shopify admin - rejecting GraphQL request');
+                sendResponse({ 
+                    success: false, 
+                    error: 'This operation requires being on a Shopify admin page.'
+                });
+                return false;
+            }
+
             const endpoint = getGraphQLEndpoint();
             console.debug('Using endpoint:', endpoint);
 

@@ -79,15 +79,13 @@ export function MenuImport({ onSuccess }: MenuImportProps) {
   };
 
   return (
-    <div className="p-4 bg-white rounded-md shadow-sm">
-      <h2 className="text-lg font-medium mb-3">Import Menu</h2>
-      
+    <div>
       <div className="mb-3">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Paste JSON or upload a file
+          Paste JSON
         </label>
         <textarea
-          className="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-32"
+          className="w-full rounded-md border border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-24"
           placeholder='{"title": "Main Menu", "handle": "main-menu", "items": [...]}'
           value={menuJson}
           onChange={handleTextAreaChange}
@@ -96,6 +94,9 @@ export function MenuImport({ onSuccess }: MenuImportProps) {
       </div>
       
       <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Or upload a file
+        </label>
         <input
           type="file"
           accept=".json"
