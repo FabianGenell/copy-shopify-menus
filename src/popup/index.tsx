@@ -132,65 +132,62 @@ function App() {
   }
   
   return (
-    <div className="flex flex-col w-96 p-4 bg-gray-50">
-      <header className="mb-4">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Shopify Menu Copier</h1>
-        <p className="text-sm text-gray-600">
-          Copy, export, and import menus from your Shopify store
-        </p>
+    <div className="flex flex-col w-96 p-3 bg-white">
+      <header className="mb-3">
+        <h1 className="text-lg font-semibold text-gray-800">Shopify Menu Tool</h1>
       </header>
       
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-md text-sm">
+        <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-xs">
           {error}
         </div>
       )}
       
       {/* Only show MenuFinder if we're not already on a specific menu page */}
       {(!pageContext?.isSpecificMenuPage || !selectedMenu) && (
-        <div className="mb-4">
-          <div className={pageContext?.isMenusPage ? "bg-blue-50 p-3 mb-3 rounded-md text-sm text-blue-700" : "hidden"}>
-            {pageContext?.isMenusPage && !pageContext?.isSpecificMenuPage 
-              ? "You're on the menus page. Select a specific menu to enable copying and exporting." 
-              : ""}
-          </div>
+        <div className="mb-3">
+          {pageContext?.isMenusPage && !pageContext?.isSpecificMenuPage && (
+            <div className="bg-blue-50 p-2 mb-2 rounded text-xs text-blue-700">
+              You're on the menus page. Select a specific menu.
+            </div>
+          )}
           <MenuFinder onMenuFound={handleMenuFound} />
         </div>
       )}
       
       {selectedMenu && (
         <>
-          <div className="mb-4">
+          <div className="mb-3">
             <MenuInfo menu={selectedMenu} />
           </div>
           
-          <div className="mb-4">
+          <div className="mb-3">
             <nav className="flex border-b border-gray-200">
               <button
-                className={`px-4 py-2 text-sm font-medium ${
+                className={`flex-1 px-4 py-2 text-xs font-medium ${
                   activeTab === Tab.COPY
                     ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
                 onClick={() => setActiveTab(Tab.COPY)}
               >
                 Copy
               </button>
               <button
-                className={`px-4 py-2 text-sm font-medium ${
+                className={`flex-1 px-4 py-2 text-xs font-medium ${
                   activeTab === Tab.EXPORT
                     ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
                 onClick={() => setActiveTab(Tab.EXPORT)}
               >
                 Export
               </button>
               <button
-                className={`px-4 py-2 text-sm font-medium ${
+                className={`flex-1 px-4 py-2 text-xs font-medium ${
                   activeTab === Tab.IMPORT
                     ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
                 onClick={() => setActiveTab(Tab.IMPORT)}
               >
@@ -199,19 +196,17 @@ function App() {
             </nav>
           </div>
           
-          <div className="mb-4">
+          <div>
             {renderTabContent()}
           </div>
         </>
       )}
       
       {!selectedMenu && !pageContext?.isSpecificMenuPage && (
-        <div className="text-center text-gray-600 bg-gray-100 p-6 rounded-md">
-          <p>
-            {pageContext?.isMenusPage 
-              ? "Select a menu from the Shopify admin to get started" 
-              : "Search for a menu to get started"}
-          </p>
+        <div className="text-center text-gray-600 bg-gray-50 p-4 rounded text-xs">
+          {pageContext?.isMenusPage 
+            ? "Select a menu from the Shopify admin" 
+            : "Search for a menu to get started"}
         </div>
       )}
     </div>

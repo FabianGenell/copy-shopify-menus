@@ -36,36 +36,16 @@ export function MenuInfo({ menu }: MenuInfoProps) {
   const depth = getMaxDepth(menu.items);
 
   return (
-    <div className="p-4 bg-white rounded-md shadow-sm">
-      <h2 className="text-lg font-medium mb-3">Menu Information</h2>
+    <div className="bg-gray-50 rounded p-3 mb-2">
+      <div className="text-sm font-medium mb-2 text-blue-700">{menu.title}</div>
       
-      <div className="space-y-1 text-sm">
-        <div className="grid grid-cols-3">
-          <div className="font-medium">Title:</div>
-          <div className="col-span-2">{menu.title}</div>
+      <div className="flex items-center text-xs text-gray-500 space-x-3">
+        <div>
+          <span className="font-medium">{totalItems}</span> items
         </div>
-        
-        <div className="grid grid-cols-3">
-          <div className="font-medium">Handle:</div>
-          <div className="col-span-2">{menu.handle}</div>
+        <div>
+          <span className="font-medium">{depth}</span> level{depth !== 1 ? 's' : ''}
         </div>
-        
-        <div className="grid grid-cols-3">
-          <div className="font-medium">Items:</div>
-          <div className="col-span-2">{totalItems}</div>
-        </div>
-        
-        <div className="grid grid-cols-3">
-          <div className="font-medium">Depth:</div>
-          <div className="col-span-2">{depth} level{depth !== 1 ? 's' : ''}</div>
-        </div>
-        
-        {menu.id && (
-          <div className="grid grid-cols-3">
-            <div className="font-medium">ID:</div>
-            <div className="col-span-2 truncate" title={menu.id}>{menu.id}</div>
-          </div>
-        )}
       </div>
     </div>
   );

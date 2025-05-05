@@ -43,38 +43,27 @@ export function MenuCopy({ menu, onSuccess }: MenuCopyProps) {
   };
 
   return (
-    <div className="p-4 bg-white rounded-md shadow-sm">
-      <h2 className="text-lg font-medium mb-3">Copy Menu</h2>
-      
-      <div className="text-sm mb-4">
-        <div><strong>Original Menu:</strong> {menu.title} ({menu.handle})</div>
-      </div>
-      
-      <div className="space-y-3 mb-4">
+    <div className="bg-white rounded">
+      <div className="space-y-3 mb-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Handle Suffix
-          </label>
           <input
             type="text"
-            className="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="w-full rounded border-gray-200 p-2 text-sm bg-gray-50"
+            placeholder="Handle suffix (default: -copy)"
             value={handleSuffix}
             onChange={(e) => setHandleSuffix(e.target.value)}
             disabled={isLoading}
           />
           <div className="mt-1 text-xs text-gray-500">
-            New handle will be: {menu.handle}{handleSuffix}
+            {menu.handle}{handleSuffix}
           </div>
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            New Title (Optional)
-          </label>
           <input
             type="text"
-            className="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-            placeholder={menu.title}
+            className="w-full rounded border-gray-200 p-2 text-sm bg-gray-50"
+            placeholder={`New title (default: ${menu.title})`}
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             disabled={isLoading}
@@ -83,15 +72,15 @@ export function MenuCopy({ menu, onSuccess }: MenuCopyProps) {
       </div>
       
       <button 
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+        className="w-full py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
         onClick={copyMenu}
         disabled={isLoading}
       >
-        {isLoading ? 'Copying...' : 'Copy Menu'}
+        {isLoading ? 'Copying...' : 'Create Copy'}
       </button>
       
       {error && (
-        <div className="text-red-600 text-sm mt-3">{error}</div>
+        <div className="text-red-600 text-xs mt-2">{error}</div>
       )}
     </div>
   );
