@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShopifyMenuService } from '../lib/menu-service';
 import { Menu } from '../lib/menu-types';
 
@@ -8,18 +8,28 @@ interface MenuCopyProps {
 }
 
 export function MenuCopy({ menu, onSuccess }: MenuCopyProps) {
-  const [handleSuffix, setHandleSuffix] = useState('-copy');
+  const [newHandle, setNewHandle] = useState('');
   const [newTitle, setNewTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const menuService = new ShopifyMenuService();
+  
+  // Initialize the new handle when the menu changes
+  useEffect(() => {
+    setNewHandle(`${menu.handle}-copy`);
+  }, [menu.handle]);
 
   const copyMenu = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
+      // Extract the suffix by comparing with original handle
+      const handleSuffix = newHandle.startsWith(menu.handle)
+        ? newHandle.slice(menu.handle.length)
+        : `-${newHandle}`; // Fallback to ensure there's a separator
+        
       const result = await menuService.copyMenu(menu.handle, {
         handleSuffix,
         newTitle: newTitle || undefined
@@ -46,20 +56,23 @@ export function MenuCopy({ menu, onSuccess }: MenuCopyProps) {
     <div className="bg-white rounded">
       <div className="space-y-3 mb-3">
         <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Handle
+          </label>
           <input
             type="text"
             className="w-full rounded border-gray-200 p-2 text-sm bg-gray-50"
-            placeholder="Handle suffix (default: -copy)"
-            value={handleSuffix}
-            onChange={(e) => setHandleSuffix(e.target.value)}
+            placeholder="New handle"
+            value={newHandle}
+            onChange={(e) => setNewHandle(e.target.value)}
             disabled={isLoading}
           />
-          <div className="mt-1 text-xs text-gray-500">
-            {menu.handle}{handleSuffix}
-          </div>
         </div>
         
         <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Title
+          </label>
           <input
             type="text"
             className="w-full rounded border-gray-200 p-2 text-sm bg-gray-50"
