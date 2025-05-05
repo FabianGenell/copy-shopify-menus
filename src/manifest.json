@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Shopify Admin Extension",
+    "name": "Shopify Menu Copier",
     "version": "1.0.0",
-    "description": "A Shopify Admin Extension",
+    "description": "Copy, export, and import Shopify menus directly from the Shopify admin",
     "author": "Fabian Genell",
     "minimum_chrome_version": "88",
     "permissions": ["activeTab", "storage"],
@@ -30,6 +30,6 @@
         }
     ],
     "offline_enabled": false,
-    "short_name": "Shopify Admin Extension",
+    "short_name": "Shopify Menu Copier",
     "commands": {}
 }

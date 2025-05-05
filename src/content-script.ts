@@ -1,4 +1,4 @@
-console.debug('Shopify Admin Base content script initialized');
+console.debug('Shopify Menu Copier content script initialized');
 
 function getGraphQLEndpoint(): string {
     const url = window.location.href;
@@ -10,7 +10,55 @@ function getGraphQLEndpoint(): string {
     return `https://admin.shopify.com/store/${storeName}/api/2025-01/graphql.json`;
 }
 
+// Extract information about the current page URL
+function extractUrlInfo(url: string) {
+    const info = {
+        isAdminPage: url.includes('admin.shopify.com'),
+        isMenusPage: false,
+        isSpecificMenuPage: false,
+        storeHandle: null as string | null,
+        menuId: null as string | null
+    };
+
+    // Extract store handle
+    const storeMatch = url.match(/admin\.shopify\.com\/store\/([^\/]+)/);
+    if (storeMatch && storeMatch[1]) {
+        info.storeHandle = storeMatch[1];
+    }
+
+    // Check if it's a menus page
+    if (url.includes('/content/menus')) {
+        info.isMenusPage = true;
+
+        // Check if it's a specific menu page
+        const menuIdMatch = url.match(/\/menus\/(\d+)(?:\/|$)/);
+        if (menuIdMatch && menuIdMatch[1]) {
+            info.isSpecificMenuPage = true;
+            info.menuId = menuIdMatch[1];
+        }
+    }
+
+    return info;
+}
+
+// Listen for popup being opened to send URL context
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === 'get-page-context') {
+        const pageInfo = extractUrlInfo(window.location.href);
+        sendResponse({ success: true, pageInfo });
+        return false; // No async response
+    }
+    
+    if (message.type === 'open-url') {
+        if (message.url) {
+            window.location.href = message.url;
+            sendResponse({ success: true });
+        } else {
+            sendResponse({ success: false, error: 'No URL provided' });
+        }
+        return false; // No async response
+    }
+    
     if (message.type === 'graphql-request') {
         try {
             console.debug('=== GraphQL Request Start ===');
@@ -59,9 +107,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                             statusText: response.statusText,
                             body: responseText
                         });
-                        throw new Error(
-                            `HTTP error! status: ${response.status}\nResponse: ${responseText}`
-                        );
+                        
+                        let errorMessage = `HTTP error! status: ${response.status}`;
+                        
+                        // Try to extract a more helpful message from the response
+                        try {
+                            const jsonResponse = JSON.parse(responseText);
+                            if (jsonResponse.errors && jsonResponse.errors.length > 0) {
+                                const messages = jsonResponse.errors.map((e: any) => e.message).join(', ');
+                                errorMessage += `: ${messages}`;
+                            } else if (jsonResponse.message) {
+                                errorMessage += `: ${jsonResponse.message}`;
+                            } else {
+                                errorMessage += `\nResponse: ${responseText.substring(0, 100)}${responseText.length > 100 ? '...' : ''}`;
+                            }
+                        } catch (e) {
+                            // If we can't parse as JSON, just include a snippet of the response
+                            errorMessage += `\nResponse: ${responseText.substring(0, 100)}${responseText.length > 100 ? '...' : ''}`;
+                        }
+                        
+                        throw new Error(errorMessage);
                     }
 
                     return response.json();
@@ -74,7 +139,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                         errors: data.errors,
                         data: data.data
                     });
-                    sendResponse({ success: true, data });
+                    
+                    // Check for GraphQL errors that might be contained in a successful HTTP response
+                    if (data.errors && data.errors.length > 0) {
+                        // Pass both the data and errors to the popup
+                        sendResponse({ success: true, data, hasErrors: true });
+                    } else {
+                        sendResponse({ success: true, data });
+                    }
                 })
                 .catch((error) => {
                     console.error('Request failed:', {
