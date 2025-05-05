@@ -133,8 +133,9 @@ function App() {
   
   return (
     <div className="flex flex-col w-96 p-3 bg-white">
-      <header className="mb-3">
+      <header className="mb-3 flex justify-between items-center">
         <h1 className="text-lg font-semibold text-gray-800">Shopify Menu Tool</h1>
+        <img src="./icon.png" alt="Shopify Menu Tool" className="h-6 w-6" />
       </header>
       
       {error && (

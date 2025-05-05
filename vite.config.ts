@@ -22,9 +22,10 @@ function extensionPlugin() {
                     })
                 );
 
-                // Copy manifest.json
+                // Copy manifest.json and icon
                 copyFileSync('src/manifest.json', 'dist/manifest.json');
-                console.log('✓ Copied manifest.json to dist/');
+                copyFileSync('src/icon.png', 'dist/icon.png');
+                console.log('✓ Copied manifest.json and icon.png to dist/');
 
                 copyFileSync('dist/src/popup/index.html', 'dist/popup.html');
                 unlinkSync('dist/src/popup/index.html');
