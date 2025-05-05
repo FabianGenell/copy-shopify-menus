@@ -1,0 +1,35 @@
+{
+    "manifest_version": 3,
+    "name": "Shopify Admin Extension",
+    "version": "1.0.0",
+    "description": "A Shopify Admin Extension",
+    "author": "Fabian Genell",
+    "minimum_chrome_version": "88",
+    "permissions": ["activeTab", "storage"],
+    "host_permissions": ["https://admin.shopify.com/*"],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icon16.png",
+            "48": "icon48.png",
+            "128": "icon128.png"
+        }
+    },
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://admin.shopify.com/*"],
+            "js": ["content-script.js"]
+        }
+    ],
+    "offline_enabled": false,
+    "short_name": "Shopify Admin Extension",
+    "commands": {}
+}
