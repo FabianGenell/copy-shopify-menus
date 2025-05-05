@@ -1,4 +1,4 @@
-import { CopyMenuOptions, Menu, MenuResponse, ShopifyURLInfo } from './menu-types';
+import { CopyMenuOptions, Menu, MenuResponse, ShopifyURLInfo, MenuBasicInfo } from './menu-types';
 import { executeGraphQLRequest } from './graphql';
 
 /**
@@ -57,37 +57,20 @@ export class ShopifyMenuService {
     }
 
     /**
-     * Fetches a menu by its handle
-     *
-     * @param handle - The handle of the menu to fetch
-     * @returns The menu object
+     * Fetches a list of all available menus (basic info only)
+     * 
+     * @returns Array of menu basic information
      */
-    async getMenuByHandle(handle: string): Promise<Menu | null> {
+    async getAllMenus(): Promise<MenuBasicInfo[]> {
         const query = `
-      query getMenu($handle: String!) {
-        menu(handle: $handle) {
-          id
-          title
-          handle
-          items {
-            id
-            title
-            type
-            url
-            resourceId
-            items {
+      query getMenus {
+        menus(first: 50) {
+          edges {
+            node {
               id
               title
-              type
-              url
-              resourceId
-              items {
-                id
-                title
-                type
-                url
-                resourceId
-              }
+              handle
+              isDefault
             }
           }
         }
@@ -96,19 +79,54 @@ export class ShopifyMenuService {
 
         try {
             const response = await executeGraphQLRequest({
-                query,
-                variables: { handle }
+                query
             });
 
             // Check if the response has the expected structure
-            if (!response?.data?.menu) {
-                console.warn('Menu not found or invalid response structure:', response);
-                return null;
+            if (!response?.data?.menus?.edges) {
+                console.warn('No menus found or invalid response structure:', response);
+                return [];
             }
 
-            return response.data.menu;
+            // Transform and validate the response
+            return response.data.menus.edges.map((edge: any) => {
+                const node = edge?.node || {};
+                return {
+                    id: node.id || '',
+                    title: node.title || 'Untitled Menu',
+                    handle: node.handle || '',
+                    isDefault: !!node.isDefault
+                };
+            }).filter((menu: MenuBasicInfo) => menu.id && menu.handle);
         } catch (error) {
-            console.error('Error fetching menu:', error);
+            console.error('Error fetching menus list:', error);
+            return [];
+        }
+    }
+    
+    /**
+     * Fetches a menu by its handle (uses getAllMenus and filters)
+     *
+     * @param handle - The handle of the menu to fetch
+     * @returns The menu object
+     */
+    async getMenuByHandle(handle: string): Promise<Menu | null> {
+        try {
+            // First, get all menus to find the one with the matching handle
+            const menus = await this.getAllMenus();
+            
+            // Find the menu with the matching handle
+            const menuInfo = menus.find(menu => menu.handle === handle);
+            
+            if (!menuInfo) {
+                console.warn(`Menu with handle "${handle}" not found among ${menus.length} menus`);
+                return null;
+            }
+            
+            // Now that we have the ID, fetch the full menu
+            return await this.getMenuById(menuInfo.id);
+        } catch (error) {
+            console.error('Error fetching menu by handle:', error);
             return null;
         }
     }
@@ -138,18 +156,21 @@ export class ShopifyMenuService {
             type
             url
             resourceId
+            tags
             items {
               id
               title
               type
               url
               resourceId
+              tags
               items {
                 id
                 title
                 type
                 url
                 resourceId
+                tags
               }
             }
           }
@@ -169,11 +190,43 @@ export class ShopifyMenuService {
                 return null;
             }
 
-            return response.data.menu;
+            // Transform the response to match our Menu type
+            const menu = response.data.menu;
+            return {
+                id: menu.id,
+                title: menu.title,
+                handle: menu.handle,
+                items: this.transformMenuItems(menu.items || [])
+            };
         } catch (error) {
             console.error('Error fetching menu:', error);
             return null;
         }
+    }
+
+    /**
+     * Transforms API menu items to our internal format
+     * 
+     * @param items - The menu items from the API
+     * @returns Transformed menu items
+     */
+    private transformMenuItems(items: any[]): MenuItem[] {
+        return items.map(item => {
+            const result: MenuItem = {
+                id: item.id,
+                title: item.title,
+                type: item.type,
+                url: item.url,
+                resourceId: item.resourceId,
+                tags: item.tags
+            };
+            
+            if (item.items && Array.isArray(item.items) && item.items.length > 0) {
+                result.items = this.transformMenuItems(item.items);
+            }
+            
+            return result;
+        });
     }
 
     /**
@@ -184,8 +237,8 @@ export class ShopifyMenuService {
      */
     async createMenu(menu: Menu): Promise<MenuResponse> {
         const mutation = `
-      mutation menuCreate($input: MenuInput!) {
-        menuCreate(input: $input) {
+      mutation menuCreate($title: String!, $handle: String!, $items: [MenuItemCreateInput!]!) {
+        menuCreate(title: $title, handle: $handle, items: $items) {
           menu {
             id
             title
@@ -199,8 +252,8 @@ export class ShopifyMenuService {
       }
     `;
 
-        // Create a copy of the menu without the id fields
-        const menuInput = {
+        // Create variables for the mutation
+        const variables = {
             title: menu.title,
             handle: menu.handle,
             items: this.prepareMenuItemsForInput(menu.items)
@@ -209,7 +262,7 @@ export class ShopifyMenuService {
         try {
             const response = await executeGraphQLRequest({
                 query: mutation,
-                variables: { input: menuInput }
+                variables
             });
 
             return response.data.menuCreate;
@@ -220,22 +273,28 @@ export class ShopifyMenuService {
     }
 
     /**
-     * Prepares menu items for input by removing id fields
+     * Prepares menu items for input by removing id fields and formatting according to MenuItemCreateInput
      *
      * @param items - The menu items to prepare
-     * @returns The prepared menu items
+     * @returns The prepared menu items formatted for MenuItemCreateInput
      */
     private prepareMenuItemsForInput(items: any[]): any[] {
         return items.map((item) => {
+            // Required fields according to MenuItemCreateInput
+            // title and type are required by the API
             const newItem: any = {
                 title: item.title,
                 type: item.type
             };
 
+            // Optional fields
+            // Only add fields that are present in the item and valid for MenuItemCreateInput
             if (item.url) newItem.url = item.url;
             if (item.resourceId) newItem.resourceId = item.resourceId;
+            if (item.tags && Array.isArray(item.tags)) newItem.tags = item.tags;
 
-            if (item.items && item.items.length > 0) {
+            // Add nested items recursively if they exist
+            if (item.items && Array.isArray(item.items) && item.items.length > 0) {
                 newItem.items = this.prepareMenuItemsForInput(item.items);
             }
 

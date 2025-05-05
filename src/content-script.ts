@@ -4,9 +4,11 @@ function getGraphQLEndpoint(): string {
     const url = window.location.href;
     const storeMatch = url.match(/admin\.shopify\.com\/store\/([^\/]+)/);
     if (!storeMatch) {
+        console.error('Failed to extract store name from URL:', url);
         throw new Error('Could not determine store URL. Please ensure you are on a Shopify admin page.');
     }
     const storeName = storeMatch[1];
+    console.debug('Using store name for GraphQL endpoint:', storeName);
     return `https://admin.shopify.com/store/${storeName}/api/2025-01/graphql.json`;
 }
 

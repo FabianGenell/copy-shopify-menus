@@ -5,15 +5,17 @@
 export enum MenuItemType {
     ARTICLE = 'ARTICLE',
     BLOG = 'BLOG',
+    CATALOG = 'CATALOG',
     COLLECTION = 'COLLECTION',
     COLLECTIONS = 'COLLECTIONS',
+    CUSTOMER_ACCOUNT_PAGE = 'CUSTOMER_ACCOUNT_PAGE',
     FRONTPAGE = 'FRONTPAGE',
     HTTP = 'HTTP',
+    METAOBJECT = 'METAOBJECT',
     PAGE = 'PAGE',
     PRODUCT = 'PRODUCT',
     SEARCH = 'SEARCH',
-    SHOP_POLICY = 'SHOP_POLICY',
-    CATALOG = 'CATALOG'
+    SHOP_POLICY = 'SHOP_POLICY'
 }
 
 export interface MenuItem {
@@ -22,6 +24,7 @@ export interface MenuItem {
     type: MenuItemType | string;
     url?: string;
     resourceId?: string;
+    tags?: string[];
     items?: MenuItem[];
 }
 
@@ -79,6 +82,13 @@ export interface ShopifyURLInfo {
      * The menu ID extracted from the URL (e.g. "123456789")
      */
     menuId: string | null;
+}
+
+export interface MenuBasicInfo {
+    id: string;
+    title: string;
+    handle: string;
+    isDefault?: boolean;
 }
 
 export interface ShopifyClientConfig {
